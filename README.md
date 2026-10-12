@@ -33,6 +33,37 @@ Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
 
 ---
 
+LoginFrontend/
+├── androidApp/                  # Módulo nativo para Android
+├── desktopApp/                  # Módulo ejecutable para Escritorio (JVM)
+│   └── src/
+│       └── jvmMain/
+│           └── kotlin/          # Punto de entrada para Desktop (main.kt)
+├── shared/                      # Código fuente compartido (KMP)
+│   └── src/
+│       ├── commonMain/
+│       │   └── kotlin/
+│       │       └── org/example/project/
+│       │           ├── App.kt           # Estado global y Router de navegación
+│       │           ├── AuthService.kt   # Cliente HTTP (Ktor Client)
+│       │           └── Models.kt        # DTOs (LoginRequest y LoginResponse)
+│       ├── androidMain/         # Lógica específica para Android
+│       └── desktopMain/         # Lógica específica para Desktop
+├── webApp/                      # Módulo para Web (Wasm/JS)
+├── build.gradle.kts             # Configuración Gradle raíz
+└── settings.gradle.kts          # Inclusión de módulos del proyecto
+
+logue-backend/
+├── src/
+│   └── main/
+│       ├── kotlin/
+│       │   └── com/example/
+│       │       └── Server.kt    # Servidor Ktor (Netty), Routing y CORS
+│       └── resources/
+│           └── users.json       # Base de datos local en formato JSON
+└── build.gradle.kts             # Configuración de dependencias de Ktor
+
+
 Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
 [Compose Multiplatform](https://kotlinlang.org/compose-multiplatform/),
 [Kotlin/Wasm](https://kotl.in/wasm/)…
