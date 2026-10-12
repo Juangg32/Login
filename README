@@ -1,0 +1,121 @@
+# Sistema de Autenticación Centralizado y Control de Acceso basado en Roles (KMP + Ktor)
+
+Este proyecto implementa una solución completa y escalable de autenticación de usuarios y navegación orientada a roles. Utiliza una arquitectura **Cliente-Servidor** distribuida e independiente, construida íntegramente con el ecosistema **Kotlin**.
+
+---
+
+## 📐 Arquitectura del Sistema
+
+El sistema está dividido en dos proyectos/repositorios independientes para garantizar la separación clara de responsabilidades:
+
+1. **Backend (`logue-backend`):** Servidor HTTP desarrollado con **Ktor Server** sobre el motor **Netty**. Encargado del procesamiento de solicitudes, validación de credenciales contra un almacén local en JSON y emisión de respuestas enriquecidas con información de rol.
+2. **Frontend (`LoginFrontend`):** Cliente multiplataforma desarrollado con **Kotlin Multiplatform (KMP)** y **Compose Multiplatform**. Comparte la lógica de red, los modelos de datos (DTOs) y componentes de UI reactivos entre plataformas.
+
+```
++---------------------------+                +---------------------------+
+|    Frontend (KMP Client)  |                |   Backend (Ktor Server)   |
+|  - Compose Multiplatform  |                |  - Netty Engine (8080)    |
+|  - Ktor Client (HTTP)     | --- POST ----> |  - Routing /login         |
+|  - RoleRouter (UI)        | <--- JSON ---- |  - JSON Parsing           |
++---------------------------+                +---------------------------+
+```
+
+---
+
+## 📂 Estructura del Proyecto
+
+### Backend (`logue-backend`)
+```text
+logue-backend/
+├── src/
+│   └── main/
+│       ├── kotlin/
+│       │   └── com/example/
+│       │       └── Server.kt    # Servidor Ktor (Netty), Routing y CORS
+│       └── resources/
+│           └── users.json       # Base de datos local en formato JSON
+└── build.gradle.kts             # Dependencias de Ktor y kotlinx.serialization
+```
+
+### Frontend (`LoginFrontend`)
+```text
+LoginFrontend/
+├── desktopApp/                  # Módulo ejecutable para Escritorio (JVM)
+│   └── src/
+│       └── jvmMain/
+│           └── kotlin/          # Punto de entrada para Desktop (main.kt)
+├── shared/                      # Módulo compartido (KMP)
+│   └── src/
+│       └── commonMain/
+│           └── kotlin/
+│               └── org/example/project/
+│                   ├── App.kt           # Estado global y Router de navegación
+│                   ├── AuthService.kt   # Cliente HTTP (Ktor Client)
+│                   └── Models.kt        # DTOs (LoginRequest y LoginResponse)
+├── androidApp/                  # Módulo nativo para Android (Opcional)
+├── webApp/                      # Módulo para Web (Wasm/JS)
+├── build.gradle.kts             # Configuración Gradle raíz
+└── settings.gradle.kts          # Inclusión de módulos
+```
+
+---
+
+## 🛠️ Tecnologías Utilizadas
+
+* **Lenguaje:** Kotlin 2.x
+* **Backend Framework:** Ktor Server (Netty)
+* **Frontend Framework:** Compose Multiplatform
+* **Serialización:** `kotlinx.serialization` (JSON)
+* **Cliente HTTP:** Ktor Client
+* **Seguridad & Red:** ContentNegotiation, CORS
+
+---
+
+## ⚙️ Configuración y Ejecución
+
+### Prerrequisitos
+* **JDK 17** o superior.
+* **IntelliJ IDEA** (recomendado) o Android Studio con el plugin de Kotlin actualizado.
+
+---
+
+### 1. Iniciar el Backend (`logue-backend`)
+
+1. Abre el proyecto `logue-backend` en tu IDE.
+2. Asegúrate de tener el archivo `users.json` en `src/main/resources/users.json`.
+3. Ejecuta la función `main()` en `Server.kt`.
+4. El servidor iniciará en `http://127.0.0.1:8080`.
+
+---
+
+### 2. Iniciar el Frontend (`LoginFrontend`)
+
+Para ejecutar la aplicación en el target **Desktop (JVM)**:
+
+#### Desde la Terminal:
+```bash
+./gradlew :desktopApp:run
+```
+*(En Windows Command Prompt: `gradlew :desktopApp:run`)*
+
+#### Desde el IDE:
+1. Selecciona la configuración **desktopApp** en la barra superior.
+2. Haz clic en el botón **Run** ($\triangleright$).
+
+---
+
+## 🔄 Flujo de Autenticación y Navegación
+
+1. **Entrada de Datos:** El usuario ingresa sus credenciales en `LoginScreen`.
+2. **Petición HTTP:** `AuthService` construye un DTO `LoginRequest` y lo envía vía `POST` a `http://127.0.0.1:8080/login`.
+3. **Validación:** El backend procesa el cuerpo JSON, lee `users.json` y valida el par usuario/contraseña.
+4. **Respuesta:** El servidor retorna un `LoginResponse` indicando el éxito de la operación y el **rol asignado** (ej. *Administrador*, *Supervisor*, *Cliente*, *Doctor*, *Vendedor*).
+5. **Enrutamiento Reactivo:** `App.kt` recibe la respuesta y delega el renderizado a `RoleRouter`, mostrando el panel específico para el rol del usuario.
+
+---
+
+## 🎓 Justificación Técnica (Académica)
+
+El proyecto demuestra la implementación de un desarrollo moderno multiplataforma:
+* **Reutilización de Código:** Mediante Kotlin Multiplatform, la lógica de negocio, serialización de DTOs y llamadas a API de red se mantienen en un único módulo compartido (`shared`), reduciendo tiempos de mantenimiento y errores de integración.
+* **Desacoplamiento:** La arquitectura orientada a servicios permite sustituir el almacén de datos local (`users.json`) por una base de datos relacional/NoSQL en el servidor sin impactar la interfaz ni la lógica del cliente.
